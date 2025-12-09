@@ -1,4 +1,8 @@
 streamlit
 pandas
-pdfplumber
-openpyxl
+pdf2image
+pytesseract
+opencv-python-headless
+Pillow
+numpy
+zipfile36
