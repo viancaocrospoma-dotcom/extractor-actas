@@ -5,29 +5,35 @@ import pandas as pd
 from utils import procesar_carpeta
 
 st.title("Extractor Automático de Actas – DNI, Responsable, Institución")
-st.write("Sube tu carpeta ZIP con las actas PDF.")
+st.write("Sube un ZIP con carpetas y PDFs o un archivo PDF individual.")
 
-archivo_zip = st.file_uploader("Sube un ZIP con carpetas y PDFs", type=["zip"])
+# Botón para limpiar
+if st.button("Limpiar pantalla"):
+    st.experimental_rerun()
 
-if archivo_zip:
-    with tempfile.TemporaryDirectory() as tmp:
-        zip_path = f"{tmp}/archivos.zip"
-        
-        with open(zip_path, "wb") as f:
-            f.write(archivo_zip.read())
+# Uploader corregido
+archivo = st.file_uploader("Sube tu archivo", type=["zip", "pdf"])
 
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(tmp)
+if archivo:
+    temp_dir = tempfile.mkdtemp()
 
-        st.success("ZIP cargado y extraído correctamente.")
+    # Si es PDF simple
+    if archivo.type == "application/pdf":
+        ruta_pdf = f"{temp_dir}/archivo.pdf"
+        with open(ruta_pdf, "wb") as f:
+            f.write(archivo.read())
 
-        registros = procesar_carpeta(tmp)
-
-        df = pd.DataFrame(registros)
+        df = procesar_carpeta(temp_dir)
         st.dataframe(df)
 
-        excel_path = f"{tmp}/resultado.xlsx"
-        df.to_excel(excel_path, index=False)
+    # Si es ZIP
+    elif archivo.type == "application/zip":
+        ruta_zip = f"{temp_dir}/archivo.zip"
+        with open(ruta_zip, "wb") as f:
+            f.write(archivo.read())
 
-        with open(excel_path, "rb") as f:
-            st.download_button("Descargar Excel", f, "resultado.xlsx")
+        with zipfile.ZipFile(ruta_zip, "r") as zip_ref:
+            zip_ref.extractall(temp_dir)
+
+        df = procesar_carpeta(temp_dir)
+        st.dataframe(df)
