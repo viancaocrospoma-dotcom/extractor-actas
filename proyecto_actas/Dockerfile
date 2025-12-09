@@ -12,17 +12,17 @@ RUN apt-get update && \
     libglib2.0-0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Crear directorio de la app
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar requirements e instalar dependencias Python
-COPY requirements.txt .
+# Copiar requirements DESDE la carpeta proyecto_actas del repo
+COPY proyecto_actas/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del proyecto
-COPY . .
+# Copiar TODO el código de la carpeta proyecto_actas
+COPY proyecto_actas/ .
 
-# Exponer puerto para Streamlit
+# Puerto donde correrá Streamlit (Render pone PORT)
 ENV PORT=8501
 
 # Comando de inicio
